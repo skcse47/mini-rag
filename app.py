@@ -1,7 +1,7 @@
 import math
 
 A = [1, 2]
-B = [2, -1]
+B = [112, 114]
 
 
 dot = sum(a * b for a, b in zip(A, B))
