@@ -1,14 +1,19 @@
 import math
 
 A = [1, 2]
-B = [2, -1]
+B = [2, 1]
 
 
-dot = sum(a * b for a, b in zip(A, B))
 
-mag_a = math.sqrt(sum(a * a for a in A))
-mag_b = math.sqrt(sum(b * b for b in B))
+def cosine_similarity(vec1, vec2):
+    dot = sum(a * b for a, b in zip(vec1, vec2))
 
-cosine = dot / (mag_a * mag_b)
+    mag_a = math.sqrt(sum(a * a for a in vec1))
+    mag_b = math.sqrt(sum(b * b for b in vec2))
 
-print(cosine)
+    cosine = dot / (mag_a * mag_b)
+
+    return cosine
+
+
+print(cosine_similarity(A,B))
