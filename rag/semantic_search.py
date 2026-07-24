@@ -25,14 +25,15 @@ response = embed(
 embeddings = response["embeddings"]
 
 
-query = "How many vacation days do employees get?"
-
+# query = "How many vacation days do employees get?"
+query = "Can I work from home?"
 queryResponse = embed(
     model="nomic-embed-text",
     input=query
 )
 
 queryEmbeddings = queryResponse["embeddings"]
+results = []
 
 for chunk, embedding in zip(sentences, embeddings):
     score = cosine_similarity(
@@ -40,4 +41,20 @@ for chunk, embedding in zip(sentences, embeddings):
         embedding
     )
 
-    print(score, "->", chunk)
+    results.append({
+        "chunk": chunk,
+        "score": score
+    })
+
+results.sort(
+    key=lambda item: item["score"],
+    reverse= True
+)
+
+top_k = 2
+
+for val in results[:top_k]:
+    print(
+        val["score"], " -> ",
+        val["chunk"]
+    )
