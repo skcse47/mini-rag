@@ -16,9 +16,6 @@ response2 = embed(
     input="The weather is sunny today."
 )
 
-# "I love Python."
-# "I enjoy programming in Python."
-# "The weather is sunny today."
 
 print(type(response))
 print(response["embeddings"][0][:10])
