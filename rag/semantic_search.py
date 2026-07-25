@@ -26,24 +26,52 @@ embeddings = response["embeddings"]
 
 
 # query = "How many vacation days do employees get?"
-query = "Can I work from home?"
+query = "can work remotely?"
 queryResponse = embed(
     model="nomic-embed-text",
     input=query
 )
 
 queryEmbeddings = queryResponse["embeddings"]
+
+
+vector_store = []
+
+for index, (chunk, embedding) in enumerate( zip(sentences, embeddings)):
+    vector_store.append({
+        "id": index,
+        "text": chunk,
+        "embedding": embedding,
+        "metadata": {
+            "source": "company_policy.txt"
+        }
+    })
+
+# results = []
+
+# for chunk, embedding in zip(sentences, embeddings):
+#     score = cosine_similarity(
+#         queryEmbeddings[0],
+#         embedding
+#     )
+
+#     results.append({
+#         "chunk": chunk,
+#         "score": score
+#     })
+
 results = []
 
-for chunk, embedding in zip(sentences, embeddings):
+for record in vector_store:
+
     score = cosine_similarity(
         queryEmbeddings[0],
-        embedding
+        record["embedding"]
     )
 
     results.append({
-        "chunk": chunk,
-        "score": score
+        "score": score,
+        "record": record
     })
 
 results.sort(
@@ -53,8 +81,9 @@ results.sort(
 
 top_k = 2
 
-for val in results[:top_k]:
-    print(
-        val["score"], " -> ",
-        val["chunk"]
-    )
+for result in results[:2]:
+
+    record = result["record"]
+
+    print(record["text"])
+    print(record["metadata"])
