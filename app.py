@@ -1,19 +1,26 @@
-import math
-
-A = [1, 2]
-B = [2, 1]
-
+from rag.embedder import create_embeddings
+from rag.vector_store import load_vector_store
+from rag.retriever import retrieve
 
 
-def cosine_similarity(vec1, vec2):
-    dot = sum(a * b for a, b in zip(vec1, vec2))
+vector_store = load_vector_store(
+    "storage/vector_store.json"
+)
 
-    mag_a = math.sqrt(sum(a * a for a in vec1))
-    mag_b = math.sqrt(sum(b * b for b in vec2))
+query = input("Ask a question: ")
 
-    cosine = dot / (mag_a * mag_b)
+query_embedding = create_embeddings(query)[0]
 
-    return cosine
+results = retrieve(
+    query_embedding,
+    vector_store,
+    top_k=1
+)
 
+for result in results:
 
-print(cosine_similarity(A,B))
+    print()
+
+    print(result["score"])
+
+    print(result["record"]["text"])
