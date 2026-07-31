@@ -1,5 +1,6 @@
 from ollama import embed
 import math
+from rag.config import EMBEDDING_MODEL
 
 
 def cosine_similarity(vec1, vec2):
@@ -18,7 +19,7 @@ sentences = [
 ]
 
 response = embed(
-    model="nomic-embed-text",
+    model=EMBEDDING_MODEL,
     input=sentences
 )
 
@@ -28,7 +29,7 @@ embeddings = response["embeddings"]
 # query = "How many vacation days do employees get?"
 query = "can work remotely?"
 queryResponse = embed(
-    model="nomic-embed-text",
+    model=EMBEDDING_MODEL,
     input=query
 )
 

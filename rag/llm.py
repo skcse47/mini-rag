@@ -1,11 +1,11 @@
 from ollama import chat
-
+from rag.config import LLM_MODEL
 
 def generate_answer(context, question):
     prompt = f"""
     You are a question-answering assistant.
 
-    Answer ONLY using the provided context.
+    Answer strictly ONLY using the provided context.
 
     If the answer cannot be found in the context, reply exactly:
 
@@ -24,11 +24,19 @@ def generate_answer(context, question):
     """
 
     response = chat(
-        model="qwen2.5:0.5b",
+        model=LLM_MODEL,
         messages= [
             {
                 "role": "user",
                 "content": prompt
+            },
+             {
+                "role": "system",
+                "content": (
+                    "You answer ONLY from the provided context. "
+                    "If the answer is not in the context, reply exactly: "
+                    "'I don't know.'"
+                )
             }
         ]
     )

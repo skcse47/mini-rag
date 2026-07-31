@@ -1,5 +1,5 @@
 from ollama import embed
-
+from rag.config import EMBEDDING_MODEL
 
 def create_embeddings(texts):
     """
@@ -7,7 +7,7 @@ def create_embeddings(texts):
     """
 
     response = embed(
-        model="nomic-embed-text",
+        model=EMBEDDING_MODEL,
         input=texts
     )
 
