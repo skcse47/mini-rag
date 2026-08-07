@@ -3,6 +3,7 @@ from rag.vector_store import load_vector_store
 from rag.retriever import retrieve
 from rag.llm import generate_answer
 from rag.config import TOP_K
+from rag.prompt import build_rag_prompt
 
 
 
@@ -27,6 +28,8 @@ context = "\n".join(
 print("\n===== Retrieved Context =====")
 print(context)
 print("=============================\n")
-answer = generate_answer(context, question=query)
+
+prompt = build_rag_prompt(context, query)
+answer = generate_answer(prompt)
 
 print(answer)

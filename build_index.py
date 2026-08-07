@@ -21,7 +21,8 @@ for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         "text": chunk,
         "embedding": embedding,
         "metadata": {
-            "source": "company.txt"
+            "source": "company.txt",
+            "chunk_index": idx
         }
     })
 
