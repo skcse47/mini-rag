@@ -9,7 +9,7 @@ vector_store = load_vector_store(
 
 index = faiss.read_index("storage/faiss.index")
 
-def retrieve_with_faiss(query_embedding, top_k=3):
+def retrieve_with_faiss(query_embedding, top_k=3, metadata_filters=None):
     query_vector = np.array(query_embedding, dtype="float32").reshape(1, -1)
 
     faiss.normalize_L2(query_vector)
@@ -23,6 +23,12 @@ def retrieve_with_faiss(query_embedding, top_k=3):
         if idx == -1:
             continue
 
+        if not matches_filter(
+            vector_store[idx],
+            metadata_filters
+        ):
+            continue
+
         if idx < len(vector_store):
             results.append({
                 "score": float(distance),
@@ -30,6 +36,7 @@ def retrieve_with_faiss(query_embedding, top_k=3):
             })
 
     return results
+
 def cosine_similarity(vec1, vec2):
     dot = sum(a * b for a, b in zip(vec1, vec2))
 
@@ -61,3 +68,15 @@ def retrieve(query_embedding, vector_store, top_k=3):
     )
 
     return results[:top_k]
+
+def matches_filter(record, metadata_filter):
+
+    if metadata_filter is None:
+        return True
+
+    for key, value in metadata_filter.items():
+
+        if record["metadata"].get(key) != value:
+            return False
+
+    return True

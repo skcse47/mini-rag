@@ -17,13 +17,20 @@ query_embedding = create_embeddings(query)[0]
 
 results = retrieve_with_faiss(
     query_embedding,
-    top_k=TOP_K
+    top_k=TOP_K,
+    metadata_filters={
+        "department": "HR"
+    }
 )
 
 context = "\n".join(
         result["record"]["text"]
         for result in results
 )
+
+print('-'*10)
+print("Context:")
+print(context)
 
 prompt = build_rag_prompt(context, query)
 answer = generate_answer(prompt)

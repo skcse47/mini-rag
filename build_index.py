@@ -22,7 +22,9 @@ for idx, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
         "embedding": embedding,
         "metadata": {
             "source": "company.txt",
-            "chunk_index": idx
+            "chunk_index": idx,
+            "department": "HR",
+            "document_type": "policy"
         }
     })
 
