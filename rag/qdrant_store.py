@@ -7,6 +7,7 @@ from qdrant_client.models import (
     FieldCondition,
     MatchValue
 )
+import uuid
 
 COLLECTION_NAME = "company_documents"
 
@@ -14,19 +15,32 @@ client = QdrantClient(
     path="storage/qdrant"
 )
 
-
 def create_collection():
 
-    client.recreate_collection(
-        collection_name=COLLECTION_NAME,
-        vectors_config=VectorParams(
-            size=768,
-            distance=Distance.COSINE
+    collections = client.get_collections()
+
+    existing_collections = [
+        collection.name
+        for collection in collections.collections
+    ]
+
+    if COLLECTION_NAME not in existing_collections:
+
+        client.create_collection(
+            collection_name=COLLECTION_NAME,
+            vectors_config=VectorParams(
+                size=768,
+                distance=Distance.COSINE
+            )
         )
-    )
 
 
-def insert_documents(chunks, embeddings):
+def insert_documents(
+    chunks,
+    embeddings,
+    document_id,
+    filename
+):
 
     points = []
 
@@ -36,14 +50,14 @@ def insert_documents(chunks, embeddings):
 
         points.append(
             PointStruct(
-                id=idx,
+                id=str(uuid.uuid4()),
                 vector=embedding,
                 payload={
-                    "text": chunk,
+                    "text": chunk["text"],
                     "metadata": {
-                        "source": "company.txt",
-                        "department": "HR",
-                        "document_type": "policy"
+                        "document_id": document_id,
+                        "filename": filename,
+                        "page": chunk["page"]
                     }
                 }
             )
@@ -59,26 +73,22 @@ def insert_documents(chunks, embeddings):
 def search(
     query_embedding,
     top_k=3,
-    metadata_filter=None
+    document_id=None
 ):
 
     query_filter = None
 
-    if metadata_filter:
-
-        conditions = []
-
-        for key, value in metadata_filter.items():
-
-            conditions.append(
-                FieldCondition(
-                    key=f"metadata.{key}",
-                    match=MatchValue(value=value)
-                )
-            )
+    if document_id:
 
         query_filter = Filter(
-            must=conditions
+            must=[
+                FieldCondition(
+                    key="metadata.document_id",
+                    match=MatchValue(
+                        value=document_id
+                    )
+                )
+            ]
         )
 
     results = client.query_points(

@@ -26,7 +26,8 @@ query_embedding = create_embeddings(query)[0]
 
 results = search(
     query_embedding,
-    top_k=TOP_K
+    top_k=TOP_K,
+    document_id='fec13e14-10bf-4120-a382-20b62ba4d3f2'
 )
 
 # context = "\n".join(
@@ -39,10 +40,33 @@ context = "\n".join(
     for result in results
 )
 
-print('-'*10)
-print("Context:")
-print(context)
+score = "\n".join(
+    str(result.score)
+    for result in results
+)
 
+# print('-'*10)
+# print("Context:")
+# print(context)
+
+
+# print('-'*10)
+# print("score:")
+# print(score)
+
+print("\n===== Retrieved Results =====")
+
+for result in results:
+
+    print(f"\nScore: {result.score}")
+
+    print("Text:")
+    print(result.payload["text"])
+
+    print("Metadata:")
+    print(result.payload["metadata"])
+
+print("=============================\n")
 
 prompt = build_rag_prompt(context, query)
 answer = generate_answer(prompt)

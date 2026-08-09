@@ -1,36 +1,49 @@
-def chunk_text(text, chunk_size=2, overlap=1):
+def chunk_pages(pages, chunk_size=4, overlap=1):
     """
-    Split text into overlapping chunks.
-
-    For now, each non-empty line is treated as one sentence.
+    Create overlapping chunks while preserving page numbers.
     """
-
-    sentences = [
-        line.strip()
-        for line in text.splitlines()
-        if line.strip()
-    ]
 
     if chunk_size <= 0:
-        raise ValueError("chunk_size must be greater than 0")
+        raise ValueError(
+            "chunk_size must be greater than 0"
+        )
 
     if overlap >= chunk_size:
-        raise ValueError("overlap must be smaller than chunk_size")
-
-    stride = chunk_size - overlap
+        raise ValueError(
+            "overlap must be smaller than chunk_size"
+        )
 
     chunks = []
 
-    for i in range(0, len(sentences), stride):
+    for page in pages:
 
-        chunk = sentences[i:i + chunk_size]
+        lines = [
+            line.strip()
+            for line in page["text"].splitlines()
+            if line.strip()
+        ]
 
-        if not chunk:
-            break
+        stride = chunk_size - overlap
 
-        chunks.append("\n".join(chunk))
+        for i in range(
+            0,
+            len(lines),
+            stride
+        ):
 
-        if i + chunk_size >= len(sentences):
-            break
+            chunk_lines = lines[
+                i:i + chunk_size
+            ]
+
+            if not chunk_lines:
+                break
+
+            chunks.append({
+                "text": "\n".join(chunk_lines),
+                "page": page["page"]
+            })
+
+            if i + chunk_size >= len(lines):
+                break
 
     return chunks
