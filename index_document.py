@@ -4,6 +4,7 @@ from rag.embedder import create_embeddings
 from rag.document import create_document_id
 from rag.qdrant_store import insert_documents, create_collection
 from rag.qdrant_store import close_qdrant
+from rag.config import CHUNK_SIZE, CHUNK_OVERLAP
 
 
 PDF_PATH = "data/Leave-Policy.pdf"
@@ -15,8 +16,8 @@ pages = load_pdf(PDF_PATH)
 
 chunks = chunk_pages(
     pages,
-    chunk_size=4,
-    overlap=1
+    CHUNK_SIZE,
+    CHUNK_OVERLAP
 )
 
 texts = [

@@ -27,7 +27,7 @@ query_embedding = create_embeddings(query)[0]
 results = search(
     query_embedding,
     top_k=TOP_K,
-    document_id='fec13e14-10bf-4120-a382-20b62ba4d3f2'
+    document_id='92a807d6-cbf7-41f0-a115-58ed9c1ab756'
 )
 
 # context = "\n".join(

@@ -1,11 +1,22 @@
-def chunk_pages(pages, chunk_size=4, overlap=1):
+def chunk_pages(
+    pages,
+    chunk_size=1000,
+    overlap=200
+):
     """
-    Create overlapping chunks while preserving page numbers.
+    Create chunks from PDF pages while preserving page numbers.
+
+    chunk_size and overlap are measured in characters.
     """
 
     if chunk_size <= 0:
         raise ValueError(
             "chunk_size must be greater than 0"
+        )
+
+    if overlap < 0:
+        raise ValueError(
+            "overlap cannot be negative"
         )
 
     if overlap >= chunk_size:
@@ -17,33 +28,48 @@ def chunk_pages(pages, chunk_size=4, overlap=1):
 
     for page in pages:
 
-        lines = [
-            line.strip()
-            for line in page["text"].splitlines()
-            if line.strip()
+        paragraphs = [
+            paragraph.strip()
+            for paragraph in page["text"].split("\n\n")
+            if paragraph.strip()
         ]
 
-        stride = chunk_size - overlap
+        current_chunk = ""
 
-        for i in range(
-            0,
-            len(lines),
-            stride
-        ):
+        for paragraph in paragraphs:
 
-            chunk_lines = lines[
-                i:i + chunk_size
-            ]
+            # If adding the paragraph stays within
+            # the target size, keep building the chunk.
+            if (
+                len(current_chunk)
+                + len(paragraph)
+                + 2
+                <= chunk_size
+            ):
 
-            if not chunk_lines:
-                break
+                if current_chunk:
+                    current_chunk += "\n\n"
+
+                current_chunk += paragraph
+
+            else:
+
+                if current_chunk:
+
+                    chunks.append({
+                        "text": current_chunk,
+                        "page": page["page"]
+                    })
+
+                # Start a new chunk.
+                current_chunk = paragraph
+
+        # Add the final chunk from the page.
+        if current_chunk:
 
             chunks.append({
-                "text": "\n".join(chunk_lines),
+                "text": current_chunk,
                 "page": page["page"]
             })
-
-            if i + chunk_size >= len(lines):
-                break
 
     return chunks
