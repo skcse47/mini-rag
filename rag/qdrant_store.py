@@ -8,7 +8,7 @@ from qdrant_client.models import (
     MatchValue
 )
 import uuid
-from rag.config import COLLECTION_NAME
+from rag.config import COLLECTION_NAME, EMBEDDING_DIMENSION 
 
 COLLECTION_NAME = COLLECTION_NAME
 
@@ -30,7 +30,7 @@ def create_collection():
         client.create_collection(
             collection_name=COLLECTION_NAME,
             vectors_config=VectorParams(
-                size=768,
+                size=EMBEDDING_DIMENSION,
                 distance=Distance.COSINE
             )
         )
