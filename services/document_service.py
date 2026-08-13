@@ -2,7 +2,7 @@ from rag.document import create_document_id
 from rag.document_loader import load_pdf
 from rag.chunker import chunk_pages
 from rag.embedder import create_embeddings
-from rag.qdrant_store import create_collection, insert_documents
+from rag.qdrant_store import create_collection, insert_documents, delete_document
 
 
 def index_document(file_path, filename):
@@ -34,3 +34,11 @@ def index_document(file_path, filename):
     )
 
     return document_id
+
+def remove_document(document_id):
+    delete_document(document_id)
+
+    return {
+        "document_id": document_id,
+        "status": "deleted"
+    }

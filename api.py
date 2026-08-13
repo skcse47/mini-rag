@@ -2,12 +2,16 @@ from fastapi import FastAPI, UploadFile, File
 import os
 import shutil
 
-from services.document_service import index_document
+from services.document_service import index_document, remove_document
 from rag.qdrant_store import list_documents
-
+from pydantic import BaseModel
+from services.chat_service import answer_question
 
 app = FastAPI()
 
+class ChatRequest(BaseModel):
+    document_id: str
+    question: str
 
 UPLOAD_DIR = "data/uploads"
 
@@ -51,3 +55,18 @@ def get_documents():
     return {
         "documents": list_documents()
     }
+
+@app.post("/chat")
+def chat(request: ChatRequest):
+
+    result = answer_question(
+        question=request.question,
+        document_id=request.document_id
+    )
+
+    return result
+
+@app.delete("/document/{document_id}")
+def delete_document(document_id: str):
+
+    return remove_document(document_id)

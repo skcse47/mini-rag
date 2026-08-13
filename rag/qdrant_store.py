@@ -138,5 +138,23 @@ def list_documents():
 
     return list(documents.values())
 
+
+def delete_document(document_id):
+
+    client.delete(
+        collection_name=COLLECTION_NAME,
+        points_selector=Filter(
+            must=[
+                FieldCondition(
+                    key="metadata.document_id",
+                    match=MatchValue(
+                        value=document_id
+                    )
+                )
+            ]
+        )
+    )
+    
+
 def close_qdrant():
     client.close()
