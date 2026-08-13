@@ -8,8 +8,9 @@ from qdrant_client.models import (
     MatchValue
 )
 import uuid
+from rag.config import COLLECTION_NAME
 
-COLLECTION_NAME = "company_documents"
+COLLECTION_NAME = COLLECTION_NAME
 
 client = QdrantClient(
     path="storage/qdrant"
@@ -99,6 +100,43 @@ def search(
     )
 
     return results.points
+
+def list_documents():
+
+    results = client.scroll(
+        collection_name=COLLECTION_NAME,
+        limit=1000,
+        with_payload=True,
+        with_vectors=False
+    )
+
+    points, _ = results
+
+    documents = {}
+
+    for point in points:
+
+        metadata = point.payload.get(
+            "metadata",
+            {}
+        )
+
+        document_id = metadata.get(
+            "document_id"
+        )
+
+        filename = metadata.get(
+            "filename"
+        )
+
+        if document_id and document_id not in documents:
+
+            documents[document_id] = {
+                "document_id": document_id,
+                "filename": filename
+            }
+
+    return list(documents.values())
 
 def close_qdrant():
     client.close()
