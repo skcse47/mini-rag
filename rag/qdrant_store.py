@@ -133,6 +133,7 @@ def list_documents():
 
             documents[document_id] = {
                 "document_id": document_id,
+                "status": 'ready',
                 "filename": filename
             }
 

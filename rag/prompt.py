@@ -37,5 +37,5 @@ I don't know.
 
 4. Never guess.
 
-5. Keep the answer concise.
+5. Keep the answer at least a sentence.
 """

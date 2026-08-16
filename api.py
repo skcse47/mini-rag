@@ -6,8 +6,18 @@ from services.document_service import index_document, remove_document
 from rag.qdrant_store import list_documents
 from pydantic import BaseModel
 from services.chat_service import answer_question
-
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+import json
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class ChatRequest(BaseModel):
     document_id: str
@@ -52,21 +62,52 @@ async def upload_document(
 
 @app.get("/documents")
 def get_documents():
+    print(list_documents())
     return {
         "documents": list_documents()
     }
 
-@app.post("/chat")
-def chat(request: ChatRequest):
+# @app.post("/chat")
+# def chat(request: ChatRequest):
 
-    result = answer_question(
-        question=request.question,
-        document_id=request.document_id
+#     result = answer_question(
+#         question=request.question,
+#         document_id=request.document_id
+#     )
+
+#     return result
+
+
+@app.post("/chat")
+async def chat(request: ChatRequest):
+
+    async def generate():
+
+        async for chunk in answer_question(
+            question=request.question,
+            document_id=request.document_id
+        ):
+
+            if chunk["type"] == "text":
+                yield f"data: {json.dumps({'text': chunk['text']})}\n\n"
+
+            elif chunk["type"] == "sources":
+                yield f"data: {json.dumps({'sources': chunk['sources']})}\n\n"
+
+        yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
     )
 
-    return result
 
-@app.delete("/document/{document_id}")
+@app.delete("/documents/{document_id}")
 def delete_document(document_id: str):
 
     return remove_document(document_id)
