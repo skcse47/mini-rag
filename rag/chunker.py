@@ -1,12 +1,57 @@
+import re
+
+
+SECTION_PATTERN = re.compile(
+    r"^\s*\d+\\?\.\s+.+$"
+)
+
+
+def split_into_sections(text):
+    sections = []
+
+    current_section = []
+
+    for line in text.splitlines():
+
+        line = line.strip()
+
+        if not line:
+            continue
+
+        if SECTION_PATTERN.match(line):
+
+            if current_section:
+                sections.append(
+                    "\n".join(current_section)
+                )
+
+            current_section = [line]
+
+        else:
+            current_section.append(line)
+
+    if current_section:
+        sections.append(
+            "\n".join(current_section)
+        )
+
+    return sections
+
 def chunk_pages(
     pages,
     chunk_size=1000,
     overlap=200
 ):
     """
-    Create chunks from PDF pages while preserving page numbers.
+    Create section-aware chunks from PDF pages.
 
-    chunk_size and overlap are measured in characters.
+    Sections are detected using numbered headings such as:
+    1. Company Overview
+    2. NovaCRM
+    6. Data Retention
+
+    Small sections remain intact.
+    Large sections are split into paragraph-based chunks.
     """
 
     if chunk_size <= 0:
@@ -28,48 +73,74 @@ def chunk_pages(
 
     for page in pages:
 
-        paragraphs = [
-            paragraph.strip()
-            for paragraph in page["text"].split("\n\n")
-            if paragraph.strip()
-        ]
+        sections = split_into_sections(
+            page["text"]
+        )
 
-        current_chunk = ""
+        for section in sections:
 
-        for paragraph in paragraphs:
+            # If section fits within chunk size,
+            # keep the entire section together.
+            if len(section) <= chunk_size:
 
-            # If adding the paragraph stays within
-            # the target size, keep building the chunk.
-            if (
-                len(current_chunk)
-                + len(paragraph)
-                + 2
-                <= chunk_size
-            ):
+                chunks.append({
+                    "text": section,
+                    "page": page["page"]
+                })
 
-                if current_chunk:
-                    current_chunk += "\n\n"
+                continue
 
-                current_chunk += paragraph
+            # Large section → split into paragraphs.
+            paragraphs = [
+                paragraph.strip()
+                for paragraph in section.split("\n\n")
+                if paragraph.strip()
+            ]
 
-            else:
+            current_chunk = ""
 
-                if current_chunk:
+            for paragraph in paragraphs:
 
-                    chunks.append({
-                        "text": current_chunk,
-                        "page": page["page"]
-                    })
+                if (
+                    len(current_chunk)
+                    + len(paragraph)
+                    + 2
+                    <= chunk_size
+                ):
 
-                # Start a new chunk.
-                current_chunk = paragraph
+                    if current_chunk:
+                        current_chunk += "\n\n"
 
-        # Add the final chunk from the page.
-        if current_chunk:
+                    current_chunk += paragraph
 
-            chunks.append({
-                "text": current_chunk,
-                "page": page["page"]
-            })
+                else:
+
+                    if current_chunk:
+
+                        chunks.append({
+                            "text": current_chunk,
+                            "page": page["page"]
+                        })
+
+                    overlap_text = (
+                        current_chunk[-overlap:]
+                        if current_chunk
+                        else ""
+                    )
+
+                    current_chunk = (
+                        overlap_text
+                        + "\n\n"
+                        + paragraph
+                        if overlap_text
+                        else paragraph
+                    )
+
+            if current_chunk:
+
+                chunks.append({
+                    "text": current_chunk,
+                    "page": page["page"]
+                })
 
     return chunks
