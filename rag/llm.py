@@ -1,4 +1,3 @@
-from ollama import chat
 from rag.config import (LLM_PROVIDER,
     LLM_MODEL,
     OPENROUTER_MODEL,
@@ -31,6 +30,8 @@ def generate_answer(prompt):
         )
 
 def generate_local_answer(prompt):
+
+    from ollama import chat
 
     response = chat(
         model=LLM_MODEL,

@@ -4,7 +4,8 @@ import os
 load_dotenv()
 
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5:0.5b")
-EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
+EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "openai/text-embedding-3-small")
+EMBEDDING_BATCH_SIZE = int(os.getenv("EMBEDDING_BATCH_SIZE", 100))
 
 TOP_K = int(os.getenv("TOP_K", 2))
 CHUNK_SIZE = int(os.getenv("CHUNK_SIZE", 2))
