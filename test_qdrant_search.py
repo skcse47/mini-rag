@@ -1,26 +1,23 @@
-from rag.embedder import create_embeddings
 from rag.qdrant_store import search
 
 
 query = "How many vacation days do employees get?"
 
-query_embedding = create_embeddings(query)[0]
-
 results = search(
-    query_embedding,
+    query,
     top_k=3
 )
 
-for result in results:
+for document, score in results:
 
-    print("\nScore:", result.score)
+    print("\nScore:", score)
 
     print(
         "Text:",
-        result.payload["text"]
+        document.page_content
     )
 
     print(
         "Metadata:",
-        result.payload["metadata"]
+        document.metadata
     )

@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from services.chat_service import answer_question
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
+from fastapi.concurrency import run_in_threadpool
 import json
 app = FastAPI()
 
@@ -48,7 +49,9 @@ async def upload_document(
             buffer
         )
 
-    document_id = index_document(
+    # Embedding a large PDF takes a while; keep the event loop free.
+    document_id = await run_in_threadpool(
+        index_document,
         file_path,
         file.filename
     )
@@ -62,7 +65,6 @@ async def upload_document(
 
 @app.get("/documents")
 def get_documents():
-    print(list_documents())
     return {
         "documents": list_documents()
     }
